@@ -1,0 +1,49 @@
+name: Install some deps and cache them
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on merges to master, release branches,
+  # all PRs, and release tags 
+  push:
+    branches:
+      - main
+      - '[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+'
+    tags:
+      - '[0-9]+\.[0-9]+\.[0-9]+'
+      - '[0-9]+\.[0-9]+\.[0-9]+-rc[0-9]+'
+
+  # On anything pull request related
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  test_cache_updating:
+    name: Create test 
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - name: Checkout Git
+        id: checkout_git
+        uses: actions/checkout@v3
+        with:
+          path: actions-cache-test
+
+      - name: Setup our dev environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup ninja cmake generator
+        uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Download and build our dependencies using vcpkg
+        uses: Lord-Kamina/vcpkg-action@update_cache
+        with:
+          pkgs: "\"liblzma[core]\" \"libpng[core]\" \"pthread[core]\" \"pthreads[core]\" \"quirc[core]\" \"sdl2[core]\" \"tiff[core,jpeg,lzma,zip]\" \"zlib[core]\""
+          triplet: x64-windows-release
+          extra-args: "--clean-after-build --feature-flags=binarycaching,-compilertracking"
+          debug: "true"
+          cache-key: win64-vcpkg
+          api-token: ${{ secrets.GITHUB_TOKEN }}
