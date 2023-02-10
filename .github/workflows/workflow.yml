@@ -46,4 +46,4 @@ jobs:
           extra-args: "--clean-after-build --feature-flags=binarycaching,-compilertracking"
           debug: "true"
           cache-key: win64-vcpkg
-          api-token: ${{ secrets.GITHUB_TOKEN }}
+          api-token: ${{ secrets.CACHE_API_TOKEN }}
